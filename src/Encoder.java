@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +23,9 @@ public class Encoder {
         windowIndexes = new int[2];
     }
 
+    /**
+     * This method starts of the encoding process.
+     */
     public void startEncoding() {
         printCharstream();
         printTableStart();
@@ -35,20 +37,31 @@ public class Encoder {
         calculateEfficiency();
     }
 
+    /**
+     * This method calculates the efficiency of the compression.
+     */
     private void calculateEfficiency() {
-        System.out.println(codestreamLength);
         double efficiency = 1 - ((double)codestreamLength / (double)charstream.length());
         int efficiencyPercentage = (int)Math.ceil(efficiency * 100);
         System.out.println("\nEfficiency: \n" + efficiency + " ≃ " + efficiencyPercentage + "% reduction.");
     }
 
+    /**
+     * This method is responsible for adding the charstream to the window.
+     * At the beginning of the process the first two characters in the charstream are added to the window without any checks as the
+     * checks wouldn't be necessary.
+     * After the first two characters have been added, the checkCharsComingIntoWindow() method is called each iteration to get the
+     * characters that are coming into the window and the number of matches.
+     * The number of matches is then checked so the correct code is added to the codestream, and so the correct number of characters
+     * are added to the window, and the correct number of characters are removed from the charstream.
+     */
     private void addCharstreamToWindow() {
         String currentChar;
         boolean firstTwoCharFlag = true;
         int firstTwoChars = 0;
         int matches = 0;
 
-        int counter = 0; // FOR TESTING
+        //int counter = 0; // FOR TESTING
 
         while (charstreamArray.size() != 0) {
             checkWindowSize();
@@ -70,8 +83,8 @@ public class Encoder {
                 if (numberOfMatchingChars >= 2) {
                     addToCodestream(false, " ", numberOfMatchingChars);
                     for (int i = 0;  i < numberOfMatchingChars; i++) {
-                        window.add(charsComingIntoWindow.get(i));
-                        charstreamArray.remove(0);
+                        window.add(charsComingIntoWindow.get(i)); // Characters being added to the window.
+                        charstreamArray.remove(0); // Characters being removed from the charstream.
                     }
                 } else {
                     window.add(currentChar);
@@ -91,6 +104,16 @@ public class Encoder {
         }
     }
 
+    /**
+     * This method is responsible for checking the characters that are set to come into the window.
+     * An arraylist, charsComingIn, is created that holds the first two characters at the beginning of the charstream.
+     * The checkCharsInWindow() method is then called with charsComingIn arraylist as its parameter, to check if the first
+     * two characters match any that are currently in the window.
+     * If there is a match, then the next third character in the charstream is added to the charsComingIn arraylist and
+     * the checkCharsInWindow() method is called again.
+     * This process is repeated until there are either no more matches or not characters left in the charstream.
+     * @return An arraylist of the characters that are coming into the window, with the number of matches at the end of the arraylist.
+     */
     private ArrayList<String> checkCharsComingIntoWindow() {
         int indexCounter = 0;
         int numberOfMatches = 0;
@@ -124,10 +147,17 @@ public class Encoder {
                 charsComingIn.remove(charsComingIn.size()-1);
         }
         returnData = charsComingIn;
-        returnData.add(Integer.toString(numberOfMatches)); // Last element in the arraylist is the number of matching characters
-        return returnData;
+        returnData.add(Integer.toString(numberOfMatches)); // Last element in the arraylist is the number of matching characters.
+        return returnData; // returnData holds the characters that are coming into the window along with the number of matches at the end ^.
     }
 
+    /**
+     * This method is responsible for checking if the characters that are set to come into the window from the charstream match any of
+     * the characters that are currently in the window.
+     * @param charsComingIntoWindow The next characters in the charstream that are coming into the window.
+     * @return True if the characters in the charsComingIntoWindow array match a set of characters currently in the window,
+     * False otherwise.
+     */
     private boolean checkCharsInWindow(ArrayList<String> charsComingIntoWindow) {
 //        System.out.println(charsComingIntoWindow);
         int matchesFound = 0;
@@ -136,7 +166,7 @@ public class Encoder {
         boolean resetValues = false;
 
         int tempStartIndex = 0;
-        int tempEndIndex = 0;
+        int tempEndIndex;
         boolean startIndexFlag = true;
 
         for (int i = 0; i < charsComingIntoWindow.size(); i++) {
@@ -184,6 +214,11 @@ public class Encoder {
         return false;
     }
 
+    /**
+     * This method checks the size of the window array list.
+     * As the window can only be a maximum of 16 in length, if the window's size is greater than 16 then a loop is called to remove
+     * the first element in the array each iteration until the window is 16 in length.
+     */
     private void checkWindowSize() {
         if (window.size() > WINDOW_SIZE) {
             while (window.size() != WINDOW_SIZE) {
@@ -192,11 +227,15 @@ public class Encoder {
         }
     }
 
+    /**
+     * This method sets the characters in the window to the correct position every iteration.
+     * @param numberOfMatches *CURRENTLY NOT BEING USED*
+     */
     private void setWindowCharacters(int numberOfMatches) {
         int currentWindowLength = window.size();
         switch (currentWindowLength) {
                 case 1:
-                    f = Colors.GREEN + window.get(0) + Colors.RESET;
+                    f = window.get(0);
                     break;
                 case 2:
                     f = window.get(currentWindowLength - 1);
@@ -369,6 +408,12 @@ public class Encoder {
 
     }
 
+    /**
+     * This method adds codes to the codestream.
+     * @param singleCharacter Whether the code will be a single character or not.
+     * @param character The character to add, if the code is to be a single character.
+     * @param numberOfMatches If the code is not a single character, this is the number of matches that goes with the code prefix (e.g. <E:2>).
+     */
     private void addToCodestream(boolean singleCharacter, String character, int numberOfMatches) {
         codestreamLength++;
         if (singleCharacter)
@@ -431,25 +476,26 @@ public class Encoder {
         }
     }
 
-    private void resetWindowColors() {
-        a = Colors.RESET;
-        b = Colors.RESET;
-        c = Colors.RESET;
-        d = Colors.RESET;
-        e = Colors.RESET;
-        f = Colors.RESET;
-        zero = Colors.RESET;
-        one = Colors.RESET;
-        two = Colors.RESET;
-        three = Colors.RESET;
-        four = Colors.RESET;
-        five = Colors.RESET;
-        six = Colors.RESET;
-        seven = Colors.RESET;
-        eight = Colors.RESET;
-        nine = Colors.RESET;
-    }
-
+    /**
+     * This method prints out each row in the encoding table as it is calculated,
+     * along with the updated charstream beside each row.
+     * @param zero Character in the "zero" column.
+     * @param one Character in the "one" column.
+     * @param two Character in the "two" column.
+     * @param three Character in the "three" column.
+     * @param four Character in the "four" column.
+     * @param five Character in the "five" column.
+     * @param six Character in the "six" column.
+     * @param seven Character in the "seven" column.
+     * @param eight Character in the "eight" column.
+     * @param nine Character in the "nine" column.
+     * @param a Character in the "a" column.
+     * @param b Character in the "b" column.
+     * @param c Character in the "c" column.
+     * @param d Character in the "d" column.
+     * @param e Character in the "e" column.
+     * @param f Character in the "f" column.
+     */
     private void printTableRow(String zero, String one, String two, String three, String four, String five, String six, String seven, String eight, String nine,
                                String a, String b, String c, String d, String e, String f) {
 
