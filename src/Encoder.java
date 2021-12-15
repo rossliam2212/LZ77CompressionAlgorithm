@@ -541,6 +541,8 @@ public class Encoder {
      * This method prints out the charstream.
      */
     private void printCharstream() {
-        System.out.println("Charstream: \n" + charstream + "\n");
+        int charstreamLength = charstream.length();
+        int dimension = (int) Math.sqrt(charstreamLength);
+        System.out.println("Charstream (" + dimension + "x" + dimension + "): \n" + charstream + "\n");
     }
 }
