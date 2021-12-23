@@ -87,7 +87,7 @@ Efficiency:
 
 ![image](https://user-images.githubusercontent.com/73957889/147274236-50430d9a-2136-4da7-b09c-04c6c9f54206.png)
 
-#### Codestream from compressed image above
+#### Codestream from previously compressed image above
 
 ```
 A A B B <E:2> <A:2> <9:2> C C <E:2> <7:2> <9:2> A D <E:2> <7:2> <9:5> <7:3> C <9:5> A C B <7:5> <9:2> A <7:2> C <E:2> <9:2> A <7:2> B <E:2> <9:2> 
