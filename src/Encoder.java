@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Encoder {
     private final String charstream;
@@ -27,6 +28,13 @@ public class Encoder {
      * This method starts of the encoding process.
      */
     public void startEncoding() {
+        System.out.println(Colors.GREEN + "********************\n*** " + Colors.RESET + "LZ77 Encoder" + Colors.GREEN + " ***\n********************" + Colors.RESET);
+
+        if (printImage()) {
+            ImagePrinter imagePrinter = new ImagePrinter(charstream);
+            imagePrinter.printImage();
+        }
+
         printCharstream();
         printTableStart();
 
@@ -43,7 +51,7 @@ public class Encoder {
     private void calculateEfficiency() {
         double efficiency = 1 - ((double)codestreamLength / (double)charstream.length());
         int efficiencyPercentage = (int)Math.ceil(efficiency * 100);
-        System.out.println("\nEfficiency: \n" + efficiency + " ≃ " + efficiencyPercentage + "% reduction.");
+        System.out.println("\nEfficiency: \n" + efficiency + " ≃ " + efficiencyPercentage + "% reduction.\n");
     }
 
     /**
@@ -173,14 +181,18 @@ public class Encoder {
             if (resetValues) {
                 i = 0;
                 matchesFound = 0;
-                if (windowCounter >= window.size()-1 || windowCounterReset >= window.size() - 1) return false;
+//                if (windowCounter >= window.size()-1) return false;
+                if (checkWindowCounter(windowCounter))
+                    return false;
                 windowCounter = windowCounterReset + 1;
                 windowCounterReset++;
                 startIndexFlag = true;
                 resetValues = false;
             }
 
-            if (windowCounter > window.size()-1) return false;
+//            if (windowCounter > window.size()-1) return false;
+            if (checkWindowCounter(windowCounter))
+                return false;
             if (charsComingIntoWindow.get(i).equals(window.get(windowCounter))) {
                 if (startIndexFlag) {
                     tempStartIndex = windowCounter;
@@ -190,7 +202,9 @@ public class Encoder {
                 windowCounter++;
 
                 for (int j = i+1; j < charsComingIntoWindow.size(); j++) {
-                    if (windowCounter > window.size()-1) return false;
+//                    if (windowCounter > window.size()-1) return false;
+                    if (checkWindowCounter(windowCounter))
+                        return false;
                     if (charsComingIntoWindow.get(j).equals(window.get(windowCounter))) { // This line is breaking the second example
                         tempEndIndex = windowCounter;
                         matchesFound++;
@@ -215,6 +229,16 @@ public class Encoder {
     }
 
     /**
+     * This method is called from the checkCharsInWindow() method.
+     * It checks to see if the index of the next character in the window is valid (i.e. The index is not out of bounds).
+     * @param windowCounter The index of the next character in the window that is going to be checked.
+     * @return True if the index is valid, False otherwise.
+     */
+    private boolean checkWindowCounter(int windowCounter) {
+        return windowCounter > window.size() - 1;
+    }
+
+    /**
      * This method checks the size of the window array list.
      * As the window can only be a maximum of 16 in length, if the window's size is greater than 16 then a loop is called to remove
      * the first element in the array each iteration until the window is 16 in length.
@@ -228,7 +252,7 @@ public class Encoder {
     }
 
     /**
-     * This method sets the characters in the window to the correct position every iteration.
+     * This method sets the characters in the window to the correct position in the encoding table every iteration.
      * @param numberOfMatches *CURRENTLY NOT BEING USED*
      */
     private void setWindowCharacters(int numberOfMatches) {
@@ -543,6 +567,26 @@ public class Encoder {
     private void printCharstream() {
         int charstreamLength = charstream.length();
         int dimension = (int) Math.sqrt(charstreamLength);
-        System.out.println("Charstream (" + dimension + "x" + dimension + "): \n" + charstream + "\n");
+        System.out.println("\nCharstream (" + dimension + "x" + dimension + "): \n" + charstream + "\n");
+    }
+
+    /**
+     * This method returns the codestream.
+     * @return The codestream.
+     */
+    public String getCodestream() {
+        return codestream;
+    }
+
+    /**
+     * This method is used to ask the user if they would like to print the image before the encoding process starts.
+     * @return True if they would like to print the image, False otherwise.
+     */
+    private boolean printImage() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("\nWould you like to print the image? (y/n) \n> ");
+        String choice  = scanner.nextLine();
+
+        return choice.equalsIgnoreCase("y");
     }
 }
