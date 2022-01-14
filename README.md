@@ -1,6 +1,6 @@
 # LZ77CompressionAlgorithm
 
-Simple LZ77 Compression Encoding program written using Java.
+Simple LZ77 Compression Encoding & Decoding program written using Java.
 
 ## Encoding Example:
 
